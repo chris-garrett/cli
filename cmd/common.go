@@ -13,6 +13,8 @@ import (
 
 	"github.com/rancher/go-rancher/v2"
 
+	"os/user"
+
 	"github.com/docker/docker/pkg/namesgenerator"
 	"github.com/urfave/cli"
 )
@@ -41,7 +43,11 @@ func GetRawClient(ctx *cli.Context) (*client.RancherClient, error) {
 func lookupConfig(ctx *cli.Context) (Config, error) {
 	path := ctx.GlobalString("config")
 	if path == "" {
-		path = os.ExpandEnv("${HOME}/.rancher/cli.json")
+		user, err := user.Current()
+		if err != nil {
+			return Config{}, err
+		}
+		path = user.HomeDir + "/.rancher/cli.json"
 	}
 
 	config, err := LoadConfig(path)
